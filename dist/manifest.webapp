@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "name": "Prüf",
+  "launch_path": "/index.html",
+  "description": "Bake Better Bread",
+  "icons": {
+    "512": "images/mipmap-mdpi/ic_launcher.png"
+  },
+  "developer": {
+    "name": "",
+    "url": ""
+  },
+  "installs_allowed_from": [
+    "*"
+  ],
+  "default_locale": "en",
+  "permissions": {
+  },
+  "locales": {
+    "en": {
+      "name": "Prüf",
+      "description": "Bake Better Bread"
+    }
+  }
+}

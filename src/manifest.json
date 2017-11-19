@@ -1,0 +1,33 @@
+{
+  "name": "Proof",
+  "short_name": "Proof",
+  "description": "Bake Better Bread",
+  "icons": [{
+        "src": "images/mipmap-mdpi/ic_launcher.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      },
+      {
+        "src": "images/mipmap-hdpi/ic_launcher.png",
+        "sizes": "768x768",
+        "type": "image/png"
+      },
+      {
+        "src": "images/mipmap-xhdpi/ic_launcher.png",
+        "sizes": "1024x1024",
+        "type": "image/png"
+      },
+      {
+        "src": "images/mipmap-xxhdpi/ic_launcher.png",
+        "sizes": "1536x1536",
+        "type": "image/png"
+      },
+      {
+        "src": "images/mipmap-xxxhdpi/ic_launcher.png",
+        "sizes": "2048x2048",
+        "type": "image/png"
+      }],
+  "display": "standalone",
+  "background_color": "#009688",
+  "theme_color": "#009688"
+}
