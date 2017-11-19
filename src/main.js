@@ -11,17 +11,13 @@ import {
   Link,
   Switch
 } from 'react-router-dom';
-import * as firebase from 'firebase';
-import {FirebaseAuth} from 'react-firebaseui';
-
+//import * as firebase from 'firebase';
 import SwipeableViews from 'react-swipeable-views';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {blue500,indigo500,green500,blue50,grey500} from 'material-ui/styles/colors';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import 'babel-polyfill';
 import AppBar from 'material-ui/Appbar';
-import Drawer from 'material-ui/Drawer';
-import Snackbar from 'material-ui/Snackbar';
 import TextField from 'material-ui/TextField';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
@@ -31,8 +27,10 @@ import FloatingActionButton from 'material-ui/FloatingActionButton';
 import FontIcon from 'material-ui/FontIcon';
 
 import localforage from 'localforage';
-// var firebase = require('firebase');
-var firebaseui = require('firebaseui');
+
+var firebase = require('firebase/app');
+require('firebase/auth');
+require('firebase/database');
 
 (function() {
   'use strict';
@@ -194,6 +192,7 @@ class WeightSelector extends React.Component {
         <TextField
           id="doughWeight"
           hintText="How much dough do you want?"
+          floatingLabelText="Dough weight"
           type="number"
           value={this.props.value}
           onChange={this.props.onChange}
@@ -307,7 +306,6 @@ class App extends React.Component {
     Object.keys(recipes).forEach((key)=> this.menuItems.push(<MenuItem key={key} value={key} primaryText={recipes[key].name} />));
     var bread = Object.keys(recipes);
     this.setState ({recipes: recipes});
-    console.log("[Prüf] Menu Items " + bread[0]);
   }
   handleWeightChange(event,value){
     this.setState({doughWeight: value});
@@ -332,7 +330,6 @@ class App extends React.Component {
     // Calculate flour weight
     var flourWeight = parseFloat(weight) * 100 / totalProportion;
 
-    console.log("[Prüf] Target weight: " + weight + " | Total Proportion: " + totalProportion + " | Flour Weight " + flourWeight);
     // Multiply relative unit by each ingredient proportion
     var absIngredients = {};
     absIngredients["Flour"] = flourWeight;
@@ -359,9 +356,9 @@ class App extends React.Component {
     }
 
     if(this.state.imageFilename=='' || this.state.imageFilename==undefined){
-      var imageURL = "images/drawable-xhdpi/sliced_loaf.png"
+      var imageURL = "images/drawable-mdpi/sliced_loaf.png"
     } else {
-      var imageURL = "images/drawable-xhdpi/" + this.state.imageFilename;
+      var imageURL = "images/drawable-mdpi/" + this.state.imageFilename;
     }
     return (
       <div>
