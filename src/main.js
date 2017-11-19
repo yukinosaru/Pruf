@@ -95,12 +95,12 @@ if ('serviceWorker' in navigator &&
 
 // Initialize Firebase
 var firebaseConfig = {
-  apiKey: "AIzaSyCtJJfsVxW0QkLBU3JW03qbLL7Gd80ossg",
-  authDomain: "breadsheet-eaa71.firebaseapp.com",
-  databaseURL: "https://breadsheet-eaa71.firebaseio.com",
-  projectId: "breadsheet-eaa71",
-  storageBucket: "breadsheet-eaa71.appspot.com",
-  messagingSenderId: "703120037645"
+  apiKey: "AIzaSyDqH4jC3PvzDfSgzAdXUh6ZuOSLI2CBtpk",
+  authDomain: "getpruf.firebaseapp.com",
+  databaseURL: "https://getpruf.firebaseio.com",
+  projectId: "getpruf",
+  storageBucket: "",
+  messagingSenderId: "1076611818114"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -126,6 +126,128 @@ localforage.config(localforageConfig);
 // FAB
 // Card
 
+class StartFAB extends React.Component{
+  constructor(props){
+    super(props);
+  }
+  render(){
+    const style = {
+      margin: 0,
+      top: 'auto',
+      left: 'auto',
+      bottom: 32,
+      right: 20,
+      position: 'fixed'
+    }
+    return(
+      <FloatingActionButton style={style} onClick={this.props.onClick}>
+        <FontIcon className="material-icons">arrow_forward</FontIcon>  
+      </FloatingActionButton>
+    );
+  }
+}
+class IngredientsCard extends React.Component{
+  constructor(props){
+    super(props);
+    this.toTitleCase = this.toTitleCase.bind(this);
+  }
+  toTitleCase(str){
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+  }
+  render(){
+    const styles = {
+      cardStyle: {
+        margin: 8
+      }
+    }
+    var ingredients = this.props.ingredients;
+    var listItems = [];
+    Object.keys(ingredients).forEach((key)=> listItems.push(<ListItem key={key} primaryText={this.toTitleCase(key) + ": " + ingredients[key].toFixed(1) + this.props.units} />));
+
+    return (
+      <Card style={styles.cardStyle}>
+        <CardText>
+          <h3>Here's what you'll need:</h3>
+          <List>
+            {listItems}
+          </List>
+        </CardText>
+      </Card>
+    );
+  }
+}
+
+class WeightSelector extends React.Component {
+  constructor(props){
+    super(props);
+  }
+  render(){
+    const styles = {
+      cardStyle: {
+        margin: 8
+      },
+    };  
+    return(
+      <Card style={styles.cardStyle}>
+      <CardTitle subtitle={this.props.description} />
+      <CardText>
+        <TextField
+          id="doughWeight"
+          hintText="How much dough do you want?"
+          type="number"
+          value={this.props.value}
+          onChange={this.props.onChange}
+        /> {this.props.units}
+      </CardText>
+    </Card>
+    );
+  }
+}
+
+class HeroImage extends React.Component {
+  constructor(props){
+    super(props);
+  }
+
+  render(){
+    const styles = {
+      selectHintStyle: {
+        paddingLeft: 24,
+        color: grey500
+      },
+      selectLabelStyle: {
+        paddingLeft: 18,
+        color: 'white',
+        fontSize: '1.2em',
+      },
+      selectUnderlineStyle: {
+        display: 'none'
+      }
+    };
+
+    var selectHint = "Choose a bread";
+
+    return(
+      <Card>
+        <CardMedia
+          overlay={<SelectField
+            floatingLabelText={selectHint}
+            floatingLabelStyle={styles.selectHintStyle}
+            labelStyle={styles.selectLabelStyle}
+            underlineDisabledStyle={styles.selectUnderlineStyle}
+            underlineFocusStyle={styles.selectUnderlineStyle}
+            underlineStyle={styles.selectUnderlineStyle}
+            children={this.props.menuItems}
+            value={this.props.value}
+            onChange={this.props.onChange} />}
+        >
+          <img src={this.props.imageURL} alt="Bake Better Bread" />
+        </CardMedia>
+      </Card>
+    );
+  }
+}
+
 class App extends React.Component {
   constructor(props){
     super(props);
@@ -134,15 +256,20 @@ class App extends React.Component {
       doughWeight: '',
       bread: '',
       recipes: '',
-      ingredients: []
+      ingredients: [],
+      imageFilename: '',
+      showIngredients: false
     };
     this.menuItems = [];
     this.handleWeightChange = this.handleWeightChange.bind(this);
     this.handleBreadChange = this.handleBreadChange.bind(this);
     this.setRecipes = this.setRecipes.bind(this);
     this.calculateIngredients = this.calculateIngredients.bind(this);
-    this.toTitleCase = this.toTitleCase.bind(this);
+    this.handleFABClick = this.handleFABClick.bind(this);
+  }
 
+  componentWillMount(){
+    // Checks for existence of local data cache
     localforage.getItem('recipes').then((value)=>{
       if(value==null){
         // First load, so fetches firebase data and caches bread names
@@ -179,20 +306,20 @@ class App extends React.Component {
     this.menuItems = [];
     Object.keys(recipes).forEach((key)=> this.menuItems.push(<MenuItem key={key} value={key} primaryText={recipes[key].name} />));
     var bread = Object.keys(recipes);
-    this.setState ({recipes: recipes, bread: bread[0]});
+    this.setState ({recipes: recipes});
     console.log("[Prüf] Menu Items " + bread[0]);
   }
-  
   handleWeightChange(event,value){
     this.setState({doughWeight: value});
-    this.calculateIngredients(this.state.bread,value);
+    if(this.state.bread){this.calculateIngredients(this.state.bread,value);}
   }
-
   handleBreadChange(event,index,value){
-    this.setState({bread: value});
-    this.calculateIngredients(value,this.state.doughWeight);
+    this.setState({
+      bread: value,
+      imageFilename : this.state.recipes[value].imageURL
+    });
+    if(this.state.doughWeight){this.calculateIngredients(value,this.state.doughWeight);}
   }
-
   calculateIngredients(bread,weight){
     console.log("[Prüf] Calculating ingredients");
 
@@ -210,91 +337,43 @@ class App extends React.Component {
     var absIngredients = {};
     absIngredients["Flour"] = flourWeight;
     Object.keys(ingredients).forEach((key) => absIngredients[key] = (ingredients[key]/100) * flourWeight);
-    this.setState({ingredients: absIngredients});
+    this.setState({ingredients: absIngredients, showIngredients: true});
   }
-
-  toTitleCase(str){
-    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+  handleFABClick(event,value){
+    console.log("FABulous");
   }
 
   render(){
     const styles = {
       cardStyle: {
         margin: 8
-      },
-      selectHintStyle: {
-        paddingLeft: 24,
-        color: grey500
-      },
-      selectLabelStyle: {
-        paddingLeft: 18,
-        color: 'white',
-        fontSize: '1.2em',
-      },
-      selectUnderlineStyle: {
-        display: 'none'
-      },
-      FABStyle: {
-        margin: 0,
-        top: 'auto',
-        left: 'auto',
-        bottom: 32,
-        right: 20,
-        position: 'fixed',
       }
     };
 
     if(!this.state.recipes){
       var description = "Fetching recipes...";
-      var content = "";
+    } else if(!this.state.bread){
+      var description = "Ready? Pick a bread from the list above!";
     } else {
       var description = this.state.recipes[this.state.bread].description;
-      if(this.state.doughWeight == ""){
-        var content = "";
-      } else {
-        var ingredients = this.state.ingredients;
-        var objContent = [];
-        Object.keys(ingredients).forEach((key)=> objContent.push(<ListItem key={key} primaryText={this.toTitleCase(key) + ": " + ingredients[key].toFixed(1) + this.state.units} />));
-        var content = (
-          <Card style={styles.cardStyle}>
-            <CardTitle subtitle="Here's what you need" />
-            <CardText>
-              <List>
-                {objContent}
-              </List>
-            </CardText>
-          </Card>
-        );
-      }
     }
-    var selectHint = "Choose a bread";
 
+    if(this.state.imageFilename=='' || this.state.imageFilename==undefined){
+      var imageURL = "images/drawable-xhdpi/sliced_loaf.png"
+    } else {
+      var imageURL = "images/drawable-xhdpi/" + this.state.imageFilename;
+    }
     return (
       <div>
-        <AppBar title="Prüf" showMenuIconButton={false} />
-        <Card>
-          <CardMedia
-            overlay={<SelectField floatingLabelText={selectHint} floatingLabelStyle={styles.selectHintStyle} labelStyle={styles.selectLabelStyle} underlineDisabledStyle={styles.selectUnderlineStyle} underlineFocusStyle={styles.selectUnderlineStyle} underlineStyle={styles.selectUnderlineStyle} children={this.menuItems} value={this.state.bread} onChange={this.handleBreadChange} />}
-          >
-            <img src="images/drawable-xhdpi/baguette.jpg" alt="Bake Better Bread" />
-          </CardMedia>
-        </Card>
-        <Card style={styles.cardStyle}>
-          <CardTitle subtitle={description} />
-          <CardText>
-            <TextField
-              id="doughWeight"
-              hintText="How much dough do you want?"
-              type="number"
-              value={this.state.doughWeight}
-              onChange={this.handleWeightChange}
-            /> {this.state.units}
-          </CardText>
-        </Card>
-        <FloatingActionButton style={styles.FABStyle}>
-          <FontIcon className="material-icons" style={styles.icon}>arrow_forward</FontIcon>  
-        </FloatingActionButton>
-        {content}
+        <AppBar title="Prüf" showMenuIconButton={false} zDepth={3} />
+        <HeroImage menuItems={this.menuItems} value={this.state.bread} onChange={this.handleBreadChange} imageURL={imageURL} />
+        <WeightSelector
+          description={description}
+          value={this.state.doughWeight} 
+          onChange={this.handleWeightChange}
+          units={this.state.units} />
+        <StartFAB onClick={this.handleFABClick} />
+        {this.state.showIngredients ? <IngredientsCard ingredients={this.state.ingredients} units={this.state.units} /> : "" }
       </div>
       );
   }
