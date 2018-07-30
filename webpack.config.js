@@ -34,17 +34,17 @@ module.exports = {
             filename: 'service-worker.js',
             minify: true,
             staticFileGlobs: [
-                'dist/**.html',
+                'dist/index.html',
                 'dist/**.js',
                 'dist/images/**.*',
                 'dist/images/drawable-mdpi/**.*',
                 'dist/scripts/**.js',
                 'dist/scripts/sw/**.js',
-                'dist/styles/**.css',
-                'favicon.ico'
+                'dist/favicon.ico'
             ],
             stripPrefix: 'dist/',
             staticFileGlobsIgnorePatterns: [/\.map$/, /asset-manifest\.json$/],
+            navigateFallbackWhitelist: [/^(?!\/__).*/]
           }
         ),
         //new BundleAnalyzerPlugin(),

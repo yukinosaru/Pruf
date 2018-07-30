@@ -25,6 +25,14 @@ import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'mat
 import {List, ListItem} from 'material-ui/List';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import FontIcon from 'material-ui/FontIcon';
+import NavigationArrowForward from 'material-ui/svg-icons/navigation/arrow-forward.js';
+import {
+  Step,
+  Stepper,
+  StepButton,
+} from 'material-ui/Stepper';
+import RaisedButton from 'material-ui/RaisedButton';
+import FlatButton from 'material-ui/FlatButton';
 
 import localforage from 'localforage';
 
@@ -108,7 +116,6 @@ var auth = firebase.auth();
 
 // Initialise localforace
 var localforageConfig = {
-  driver      : localforage.WEBSQL, // Force WebSQL; same as using setDriver()
   name        : 'Prüf',
   version     : 1.0,
   size        : 4980736, // Size of database, in bytes. WebSQL-only for now.
@@ -118,11 +125,100 @@ var localforageConfig = {
 localforage.config(localforageConfig);
 
 // REACT components
-// Hero image
-// Target weight
-// Spinner
-// FAB
-// Card
+
+// Stepper with alarms.
+// Need to set up react router to show different pages
+class RecipeStepper extends React.Component{
+  constructor(props){
+    super(props);
+    state = {
+      stepIndex: 0,
+    };
+  }
+
+  handleNext = () => {
+    const {stepIndex} = this.state;
+    if (stepIndex < 4) {
+      this.setState({stepIndex: stepIndex + 1});
+    }
+  };
+
+  handlePrev = () => {
+    const {stepIndex} = this.state;
+    if (stepIndex > 0) {
+      this.setState({stepIndex: stepIndex - 1});
+    }
+  };
+
+  getStepContent(stepIndex) {
+      switch (stepIndex) {
+        case 0:
+          return 'Mix dough and water - leave it for 20 minutes';
+        case 1:
+          return 'Add salt and flour - stretch and fold x 4';
+        case 2:
+          return 'Warm, dry place - retard overnight if desired';
+        case 3:
+          return 'Boules, baguettes, loafs, buns, ciabatta';
+        case 4:
+          return 'Mist, Dress, Slash';
+        default:
+          return 'Sorry! Something went wrong :(';
+      }
+    }
+
+
+  render(){
+    return(
+      <div style={{width: '100%', maxWidth: 700, margin: 'auto'}}>
+        <Stepper linear={false} activeStep={stepIndex}>
+          <Step>
+            <StepButton onClick={() => this.setState({stepIndex: 0})}>
+              Autolyse
+            </StepButton>
+          </Step>
+          <Step>
+            <StepButton onClick={() => this.setState({stepIndex: 1})}>
+              Develop
+            </StepButton>
+          </Step>
+          <Step>
+            <StepButton onClick={() => this.setState({stepIndex: 2})}>
+              Prove
+            </StepButton>
+          </Step>
+          <Step>
+            <StepButton onClick={() => this.setState({stepIndex: 3})}>
+              Shape
+            </StepButton>
+          </Step>
+          <Step>
+            <StepButton onClick={() => this.setState({stepIndex: 4})}>
+              Bake
+            </StepButton>
+          </Step>
+        </Stepper>
+        <div style={contentStyle}>
+          <p>{this.getStepContent(stepIndex)}</p>
+          <div style={{marginTop: 12}}>
+            <FlatButton
+              label="Back"
+              disabled={stepIndex === 0}
+              onClick={this.handlePrev}
+              style={{marginRight: 12}}
+            />
+            <RaisedButton
+              label="Next"
+              disabled={stepIndex === 4}
+              primary={true}
+              onClick={this.handleNext}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
 
 class StartFAB extends React.Component{
   constructor(props){
@@ -139,7 +235,7 @@ class StartFAB extends React.Component{
     }
     return(
       <FloatingActionButton style={style} onClick={this.props.onClick}>
-        <FontIcon className="material-icons">arrow_forward</FontIcon>  
+        <NavigationArrowForward color='white' />
       </FloatingActionButton>
     );
   }
@@ -375,7 +471,6 @@ class App extends React.Component {
       );
   }
 }
-
 
 // STARTUP CODE
 // Sets theme colors
